@@ -70,7 +70,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, arg):
         """Prints the string representation of an instance
-Usage: show <class_name> <id>, or <class name>.show(<id>)"""
+        Usage: show <class_name> <id>, or <class name>.show(<id>)"""
         argums = HBNBCommand.parse(arg)
         obdict = models.storage.all()
         if len(argums) == 0:
@@ -86,7 +86,7 @@ Usage: show <class_name> <id>, or <class name>.show(<id>)"""
 
     def do_destroy(self, arg):
         """Deletes an instance
-Usage: destroy <class_name>, or <class name>.destroy(<id>)"""
+        Usage: destroy <class_name>, or <class name>.destroy(<id>)"""
         argums = HBNBCommand.parse(arg)
         obdict = models.storage.all()
         if len(argums) == 0:
@@ -103,7 +103,7 @@ Usage: destroy <class_name>, or <class name>.destroy(<id>)"""
 
     def do_all(self, arg):
         """Prints all instances
-Usage: all, or <class_name> all, or <class_name>.all()"""
+        Usage: all, or <class_name> all, or <class_name>.all()"""
         argums = HBNBCommand.parse(arg)
         obdict = models.storage.all()
         if len(argums) > 0 and argums[0] not in HBNBCommand.classes:
@@ -119,7 +119,7 @@ Usage: all, or <class_name> all, or <class_name>.all()"""
 
     def do_update(self, arg):
         """Updates an instance
-Usage: update <class name> <id> <attribute name> "<attribute value>\""""
+        Usage: update <class name> <id> <dictionary representation>"""
         argums = HBNBCommand.parse(arg)
         obdict = models.storage.all()
 
@@ -136,36 +136,25 @@ Usage: update <class name> <id> <attribute name> "<attribute value>\""""
             print("** no instance found **")
             return False
         if len(argums) == 2:
-            print("** attribute name missing **")
+            print("** dictionary missing **")
             return False
+
+        obj = obdict["{}.{}".format(argums[0], argums[1])]
         if len(argums) == 3:
             try:
-                type(eval(argums[2])) != dict
-            except NameError:
-                print("** value missing **")
+                attrs_dict = eval(argums[2])
+                if not isinstance(attrs_dict, dict):
+                    raise ValueError
+            except (NameError, ValueError):
+                print("** invalid dictionary format **")
                 return False
-
-        if len(argums) == 4:
-            obj = obdict["{}.{}".format(argums[0], argums[1])]
-            if argums[2] in obj.__class__.__dict__.keys():
-                valtype = type(obj.__class__.__dict__[argums[2]])
-                obj.__dict__[argums[2]] = valtype(argums[3])
-            else:
-                obj.__dict__[argums[2]] = argums[3]
-        elif type(eval(argums[2])) == dict:
-            obj = obdict["{}.{}".format(argums[0], argums[1])]
-            for k, v in eval(argums[2]).items():
-                if (k in obj.__class__.__dict__.keys() and
-                        type(obj.__class__.__dict__[k]) in {str, int, float}):
-                    valtype = type(obj.__class__.__dict__[k])
-                    obj.__dict__[k] = valtype(v)
-                else:
-                    obj.__dict__[k] = v
+            for key, value in attrs_dict.items():
+                setattr(obj, key, value)
         models.storage.save()
 
     def do_count(self, arg):
         """Counts the number of instances of a class
-Usage: count <class_name>, or <class_name>.count()"""
+        Usage: count <class_name>, or <class_name>.count()"""
         argums = HBNBCommand.parse(arg)
         count = 0
         for obj in models.storage.all().values():
