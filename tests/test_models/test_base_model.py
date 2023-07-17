@@ -1,4 +1,4 @@
-a#!/usr/bin/python3
+#!/usr/bin/python3
 
 '''
     All the test for the base_model are implemented here.
